@@ -1,0 +1,5 @@
+hetzner_token = "<your token>"
+hetzner_network_zone = "<hetzner network zone>"
+hetzner_datacenter = "<hetzner data center>"
+cloudflare_token = "<cloudflare token>"
+cloudflare_zone_id = "<cloudflare zone id>"

@@ -1,0 +1,4 @@
+*.terraform*
+main.auto.tfvars
+terraform.tfstate*
+private_key.pem
