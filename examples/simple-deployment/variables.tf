@@ -11,3 +11,7 @@ variable "hetzner_datacenter" {
 }
 variable "cloudflare_zone_id" {}
 variable "cloudflare_token" {}
+variable "dns_zone" {
+  type        = string
+  description = "DNS Zone for Gitlab"
+}

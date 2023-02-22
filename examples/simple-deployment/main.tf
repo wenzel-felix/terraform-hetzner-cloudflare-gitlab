@@ -5,4 +5,10 @@ module "gitlab" {
   hetzner_token        = var.hetzner_token
   hetzner_network_zone = var.hetzner_network_zone
   hetzner_datacenter   = var.hetzner_datacenter
+  # network_id = "2560599"
+  zone = var.dns_zone
+}
+
+output "name" {
+  value = module.gitlab.root_password
 }

@@ -16,3 +16,12 @@ variable "server_type" {
   description = "Hetzner Cloud Server Type"
   default     = "cx31"
 }
+variable "network_id" {
+  type        = string
+  description = "value of existing hcloud_network.network.id"
+  default     = null
+}
+variable "dns_zone" {
+  type        = string
+  description = "DNS Zone for Gitlab"
+}

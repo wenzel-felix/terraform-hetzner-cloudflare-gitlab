@@ -6,7 +6,7 @@ terraform {
     }
     cloudflare = {
       source  = "cloudflare/cloudflare"
-      version = "~> 3.0"
+      version = "~> 4.0"
     }
   }
 }
@@ -16,17 +16,21 @@ provider "hcloud" {
 }
 
 locals {
-  IP_range      = "10.0.0.0/16"
-  domain_prefix = "my"
+  IP_range           = "10.0.0.0/16"
+  main_subdomain     = "gitlab"
+  registry_subdomain = "registry"
+  ssh_subdomain      = "gitlab"
 }
 
 resource "hcloud_network" "network" {
+  count    = var.network_id == null ? 1 : 0
   name     = "network"
   ip_range = local.IP_range
 }
 
 resource "hcloud_network_subnet" "network" {
-  network_id   = hcloud_network.network.id
+  count        = var.network_id == null ? 1 : 0
+  network_id   = hcloud_network.network[0].id
   type         = "cloud"
   network_zone = var.hetzner_network_zone
   ip_range     = local.IP_range
@@ -49,14 +53,20 @@ resource "local_file" "name" {
 }
 
 resource "random_password" "password" {
-  length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+  length  = 16
+  special = false
+}
+
+resource "time_sleep" "wait_30_seconds" {
+  depends_on = [cloudflare_tunnel_config.gitlab]
+
+  destroy_duration = "20s"
 }
 
 resource "hcloud_server" "main" {
   depends_on = [
-    hcloud_network_subnet.network
+    hcloud_network_subnet.network,
+    time_sleep.wait_30_seconds
   ]
   name        = "gitlab-instance"
   server_type = var.server_type
@@ -68,12 +78,21 @@ resource "hcloud_server" "main" {
   }
 
   network {
-    network_id = hcloud_network.network.id
+    network_id = var.network_id == null ? hcloud_network.network[0].id : var.network_id
   }
 
   user_data = templatefile("${path.module}/scripts/base_configuration.sh", {
-    GITLAB_ROOT_PASSWORD = random_password.password.result,
-    EXTERNAL_URL         = "https://${local.domain_prefix}.hetznerdoesnot.work"
+    EXTERNAL_URL  = "https://${local.main_subdomain}.${var.dns_zone}"
+    ACCOUNT_ID    = "6b4c83722ad8306ddc86dee9d87f4d0a"
+    TUNNEL_ID     = cloudflare_tunnel.gitlab.id
+    TUNNEL_NAME   = cloudflare_tunnel.gitlab.name
+    TUNNEL_SECRET = cloudflare_tunnel.gitlab.secret
+    GITLAB_CONFIG = templatefile("${path.module}/templates/gitlab.rb.template", {
+      EXTERNAL_URL          = "https://${local.main_subdomain}.${var.dns_zone}"
+      REGISTRY_EXTERNAL_URL = "https://${local.registry_subdomain}.${var.dns_zone}"
+      GITLAB_ROOT_PASSWORD  = random_password.password.result
+      #GITLAB_SSH_HOST       = "${local.ssh_subdomain}.${var.dns_zone}"
+    })
   })
 
   provisioner "remote-exec" {
@@ -88,7 +107,6 @@ resource "hcloud_server" "main" {
       host        = self.ipv4_address
       user        = "root"
       private_key = tls_private_key.machines.private_key_openssh
-      port        = "42069"
     }
   }
 }

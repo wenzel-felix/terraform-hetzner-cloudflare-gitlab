@@ -1,0 +1,69 @@
+external_url '${EXTERNAL_URL}'
+#gitlab_rails['gitlab_ssh_host'] = '$${GITLAB_SSH_HOST}'
+letsencrypt['enable'] = false
+
+nginx['real_ip_trusted_addresses'] = [
+    '173.245.48.0/20',
+    '103.21.244.0/22',
+    '103.22.200.0/22',
+    '103.31.4.0/22',
+    '141.101.64.0/18',
+    '108.162.192.0/18',
+    '190.93.240.0/20',
+    '188.114.96.0/20',
+    '197.234.240.0/22',
+    '198.41.128.0/17',
+    '162.158.0.0/15',
+    '104.16.0.0/13',
+    '104.24.0.0/14',
+    '172.64.0.0/13',
+    '131.0.72.0/22'
+]
+nginx['real_ip_header'] = 'X-Forwarded-For'
+nginx['real_ip_recursive'] = 'on'
+
+nginx['listen_port'] = 80
+nginx['listen_https'] = false
+nginx['redirect_http_to_https'] = false
+
+nginx['proxy_set_headers'] = {
+  "X-Forwarded-Proto" => "https",
+  "X-Forwarded-Ssl" => "on"
+}
+
+gitlab_rails['initial_root_password'] = "${GITLAB_ROOT_PASSWORD}"
+
+
+registry_external_url '${REGISTRY_EXTERNAL_URL}'
+gitlab_rails['registry_enabled'] = true
+registry_nginx['enable'] = true
+registry_nginx['real_ip_trusted_addresses'] = [
+    '173.245.48.0/20',
+    '103.21.244.0/22',
+    '103.22.200.0/22',
+    '103.31.4.0/22',
+    '141.101.64.0/18',
+    '108.162.192.0/18',
+    '190.93.240.0/20',
+    '188.114.96.0/20',
+    '197.234.240.0/22',
+    '198.41.128.0/17',
+    '162.158.0.0/15',
+    '104.16.0.0/13',
+    '104.24.0.0/14',
+    '172.64.0.0/13',
+    '131.0.72.0/22'
+]
+registry_nginx['real_ip_header'] = 'X-Forwarded-For'
+registry_nginx['real_ip_recursive'] = 'on'
+registry_nginx['redirect_http_to_https'] = false
+registry_nginx['listen_https'] = false
+registry_nginx['listen_port'] = 5005
+
+registry_nginx['proxy_set_headers'] = {
+  "Host" => "$$http_host",
+  "X-Real-IP" => "$$remote_addr",
+  "X-Forwarded-For" => "$$proxy_add_x_forwarded_for",
+  "X-Forwarded-Proto" => "https",
+  "X-Forwarded-Ssl" => "on"
+}
