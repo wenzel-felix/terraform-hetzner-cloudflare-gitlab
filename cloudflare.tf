@@ -34,13 +34,13 @@ resource "random_id" "tunnel_secret" {
 }
 
 resource "cloudflare_tunnel" "gitlab" {
-  account_id = "6b4c83722ad8306ddc86dee9d87f4d0a"
+  account_id = var.cf_account_id
   name       = "gitlab"
   secret     = random_id.tunnel_secret.b64_std
 }
 
 resource "cloudflare_tunnel_config" "gitlab" {
-  account_id = "6b4c83722ad8306ddc86dee9d87f4d0a"
+  account_id = var.cf_account_id
   tunnel_id  = cloudflare_tunnel.gitlab.id
 
   config {

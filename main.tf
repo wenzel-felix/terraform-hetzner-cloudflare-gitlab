@@ -83,7 +83,7 @@ resource "hcloud_server" "main" {
 
   user_data = templatefile("${path.module}/scripts/base_configuration.sh", {
     EXTERNAL_URL  = "https://${local.main_subdomain}.${var.dns_zone}"
-    ACCOUNT_ID    = "6b4c83722ad8306ddc86dee9d87f4d0a"
+    ACCOUNT_ID    = var.cf_account_id
     TUNNEL_ID     = cloudflare_tunnel.gitlab.id
     TUNNEL_NAME   = cloudflare_tunnel.gitlab.name
     TUNNEL_SECRET = cloudflare_tunnel.gitlab.secret
