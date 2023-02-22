@@ -15,3 +15,7 @@ variable "dns_zone" {
   type        = string
   description = "DNS Zone for Gitlab"
 }
+variable "cf_account_id" {
+  type        = string
+  description = "Cloudflare Account ID"
+}
